@@ -18,19 +18,22 @@
     <header class="header">
         <nav class="navbar container" aria-label="Navigation principale">
 
-            <a href="{{ url('/') }}" class="logo">
+            <a href="{{ route('home') }}" class="logo">
                 Game<span>Match</span>
             </a>
 
             <div class="nav-links">
-                <a href="{{ url('/') }}">Accueil</a>
-                <a href="#fonctionnalites">Fonctionnalités</a>
-                <a href="#concept">Le concept</a>
+                <a href="{{ route('home') }}">Accueil</a>
+                <a href="{{ route('home') }}#fonctionnalites">Fonctionnalités</a>
+                <a href="{{ route('home') }}#concept">Le concept</a>
             </div>
 
             <div class="nav-actions">
-                <a href="#connexion" class="login-link">Connexion</a>
-                <a href="#inscription" class="btn btn-primary">
+                <a href="{{ route('login') }}" class="login-link">
+                    Connexion
+                </a>
+
+                <a href="{{ route('register') }}" class="btn btn-primary">
                     Nous rejoindre <span aria-hidden="true">↗</span>
                 </a>
             </div>
@@ -61,11 +64,11 @@
                 </p>
 
                 <div class="hero-buttons">
-                    <a href="#inscription" class="btn btn-primary">
+                    <a href="{{ route('register') }}" class="btn btn-primary">
                         Trouver mon équipe <span aria-hidden="true">→</span>
                     </a>
 
-                    <a href="#fonctionnalites" class="btn btn-secondary">
+                    <a href="{{ route('home') }}#fonctionnalites" class="btn btn-secondary">
                         Découvrir le concept
                     </a>
                 </div>
@@ -189,7 +192,7 @@
                 L'aventure GameMatch commence ici.
             </p>
 
-            <a href="#connexion" class="btn btn-primary">
+            <a href="{{ route('register') }}" class="btn btn-primary">
                 Découvrir GameMatch <span aria-hidden="true">↗</span>
             </a>
 
@@ -201,7 +204,7 @@
 
         <div class="footer-content container">
 
-            <a href="{{ url('/') }}" class="logo">
+            <a href="{{ route('home') }}" class="logo">
                 Game<span>Match</span>
             </a>
 
