@@ -29,10 +29,14 @@
             </div>
 
             <div class="nav-actions">
-                <a href="#connexion" class="login-link">Connexion</a>
-                <a href="#inscription" class="btn btn-primary">
+                @auth
+                    <a href="{{ route('dashboard') }}" class="btn btn-primary">Mon tableau de bord</a>
+                @else
+                <a href="{{ route('login') }}" class="login-link">Connexion</a>
+                <a href="{{ route('register') }}" class="btn btn-primary">
                     Nous rejoindre <span aria-hidden="true">↗</span>
                 </a>
+                @endauth
             </div>
 
         </nav>
@@ -61,7 +65,7 @@
                 </p>
 
                 <div class="hero-buttons">
-                    <a href="#inscription" class="btn btn-primary">
+                    <a href="{{ route('register') }}" class="btn btn-primary">
                         Trouver mon équipe <span aria-hidden="true">→</span>
                     </a>
 
@@ -189,7 +193,7 @@
                 L'aventure GameMatch commence ici.
             </p>
 
-            <a href="#connexion" class="btn btn-primary">
+            <a href="{{ route('login') }}" class="btn btn-primary">
                 Découvrir GameMatch <span aria-hidden="true">↗</span>
             </a>
 

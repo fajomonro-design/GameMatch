@@ -1,0 +1,17 @@
+.account-shell{max-width:630px;padding-block:clamp(30px,6vw,72px)}
+.account-panel{display:grid;gap:20px;padding:clamp(20px,5vw,42px);background:#191327;border:1px solid #382953;border-radius:22px}
+.account-panel h1{font-size:clamp(2rem,6vw,3rem);line-height:1.12}
+.account-panel a{color:#d2b8ff;text-decoration:underline;text-underline-offset:3px}
+.account-form{display:grid;gap:14px}
+.account-form label{display:grid;gap:5px}
+.account-form input,.account-form select,.account-form textarea{width:100%;padding:10px 12px;border:1px solid #594773;border-radius:8px;background:#100b1c;color:#fff;font:inherit;color-scheme:dark}
+.account-form textarea{resize:vertical}
+.account-form button,.account-panel button{justify-self:start;cursor:pointer}
+.account-form fieldset{display:grid;gap:6px;padding:12px;border:1px solid #594773;border-radius:8px}
+.account-form .account-check{display:flex;gap:8px;align-items:center}
+.account-form .account-check input{width:auto}
+.account-status,.account-errors{padding:10px 14px;border-radius:8px}
+.account-status{background:#194135}
+.account-errors{background:#542438;list-style-position:inside}
+.account-panel :focus-visible,.navbar :focus-visible{outline:2px solid #e2cfff;outline-offset:4px}
+@media(max-width:650px){.account-nav{display:flex;flex-wrap:wrap;gap:10px}}
