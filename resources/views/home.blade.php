@@ -30,7 +30,7 @@
 
             <div class="nav-actions">
                 @auth
-                    <a href="{{ route('profile') }}" class="btn btn-primary">Mon profil</a>
+                    <a href="{{ route('dashboard') }}" class="btn btn-primary">Mon tableau de bord</a>
                 @else
                 <a href="{{ route('login') }}" class="login-link">Connexion</a>
                 <a href="{{ route('register') }}" class="btn btn-primary">

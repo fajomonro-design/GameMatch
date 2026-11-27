@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\Matchmaking;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
@@ -17,17 +18,9 @@ class AccountController extends Controller
 {
     private const AGES = ['Moins de 18 ans', '18–24 ans', '25–34 ans', '35 ans et plus'];
 
-    private const PLATFORMS = ['PC', 'PlayStation', 'Xbox', 'Nintendo Switch', 'Mobile'];
-
-    private const GAMES = ['Valorant', 'Rocket League', 'Fortnite'];
-
-    private const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'];
-
-    private const STYLES = ['Compétitif', 'Détente', 'Progression'];
-
     public function registration(): View
     {
-        return view('account.register', ['ages' => self::AGES, 'platforms' => self::PLATFORMS]);
+        return view('account.register', ['ages' => self::AGES, 'platforms' => Matchmaking::PLATFORMS]);
     }
 
     public function register(Request $request): RedirectResponse
@@ -44,7 +37,7 @@ class AccountController extends Controller
                 },
             ],
             'age_group' => ['required', Rule::in(self::AGES)],
-            'platform' => ['required', Rule::in(self::PLATFORMS)],
+            'platform' => ['required', Rule::in(Matchmaking::PLATFORMS)],
         ]);
         $this->verifyCaptcha($request);
 
@@ -56,7 +49,7 @@ class AccountController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return to_route('profile')->with('status', 'Ton compte GameMatch a été créé.');
+        return to_route('dashboard')->with('status', 'Ton compte GameMatch a été créé.');
     }
 
     public function login(Request $request): RedirectResponse
@@ -71,7 +64,7 @@ class AccountController extends Controller
         }
         $request->session()->regenerate();
 
-        return redirect()->intended(route('profile'));
+        return redirect()->intended(route('dashboard'));
     }
 
     public function logout(Request $request): RedirectResponse
@@ -89,11 +82,13 @@ class AccountController extends Controller
             'player' => $request->user(),
             'options' => [
                 'age_group' => ['Tranche d’âge', self::AGES],
-                'platform' => ['Plateforme principale', self::PLATFORMS],
-                'level' => ['Niveau', self::LEVELS],
-                'play_style' => ['Style de jeu', self::STYLES],
+                'platform' => ['Plateforme principale', Matchmaking::PLATFORMS],
+                'level' => ['Niveau', Matchmaking::LEVELS],
+                'play_style' => ['Style de jeu', Matchmaking::STYLES],
+                'language' => ['Langue de jeu', Matchmaking::LANGUAGES],
             ],
-            'games' => self::GAMES,
+            'games' => array_keys(Matchmaking::GAMES),
+            'slots' => Matchmaking::SLOTS,
         ]);
     }
 
@@ -102,14 +97,19 @@ class AccountController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:24'],
             'age_group' => ['required', Rule::in(self::AGES)],
-            'platform' => ['required', Rule::in(self::PLATFORMS)],
-            'games' => ['nullable', 'array', 'list', 'max:3'],
-            'games.*' => ['required', 'distinct', Rule::in(self::GAMES)],
-            'level' => ['nullable', Rule::in(self::LEVELS)],
-            'play_style' => ['nullable', Rule::in(self::STYLES)],
+            'platform' => ['required', Rule::in(Matchmaking::PLATFORMS)],
+            'games' => ['nullable', 'array', 'list', 'max:9'],
+            'games.*' => ['required', 'distinct', Rule::in(array_keys(Matchmaking::GAMES))],
+            'level' => ['nullable', Rule::in(Matchmaking::LEVELS)],
+            'play_style' => ['nullable', Rule::in(Matchmaking::STYLES)],
+            'language' => ['nullable', Rule::in(Matchmaking::LANGUAGES)],
+            'bio' => ['nullable', 'string', 'max:500'],
+            'availability_slots' => ['nullable', 'array', 'list', 'max:4'],
+            'availability_slots.*' => ['distinct', Rule::in(Matchmaking::SLOTS)],
             'availability' => ['nullable', 'string', 'max:240'],
         ]);
         $data['games'] ??= [];
+        $data['availability_slots'] ??= [];
         $request->user()->update($data);
 
         return to_route('profile')->with('status', 'Ton profil a été enregistré.');

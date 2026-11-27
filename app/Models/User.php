@@ -27,6 +27,9 @@ class User extends Authenticatable
         'level',
         'play_style',
         'availability',
+        'language',
+        'bio',
+        'availability_slots',
     ];
 
     /**
@@ -50,6 +53,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'games' => 'array',
+            'availability_slots' => 'array',
         ];
     }
 }

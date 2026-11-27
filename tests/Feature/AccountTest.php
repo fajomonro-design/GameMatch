@@ -16,7 +16,7 @@ class AccountTest extends TestCase
     {
         $password = 'un-mot-de-passe-solide';
         $this->get(route('register'))->assertOk()->assertSee('Créer un compte');
-        $this->post(route('register'), $this->registration($password))->assertRedirect(route('profile'));
+        $this->post(route('register'), $this->registration($password))->assertRedirect(route('dashboard'));
         $user = User::where('email', 'joueur@example.test')->firstOrFail();
         $this->assertTrue(Hash::check($password, $user->password));
         $this->assertAuthenticatedAs($user);
@@ -45,7 +45,7 @@ class AccountTest extends TestCase
         $this->post(route('register'), $input)->assertSessionHasErrors('cf-turnstile-response');
         $this->assertDatabaseMissing('users', ['email' => $input['email']]);
 
-        $this->post(route('register'), $input)->assertRedirect(route('profile'));
+        $this->post(route('register'), $input)->assertRedirect(route('dashboard'));
         $this->assertDatabaseHas('users', ['email' => $input['email']]);
     }
 

@@ -13,6 +13,7 @@
     <nav class="navbar container" aria-label="Navigation principale">
         <a class="logo" href="{{ route('home') }}">Game<span>Match</span></a>
         @auth
+            <a class="login-link" href="{{ route('dashboard') }}">Tableau de bord</a>
             <form method="post" action="{{ route('logout') }}">
                 @csrf
                 <button class="btn btn-secondary" type="submit">Se déconnecter</button>
