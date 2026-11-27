@@ -1,5 +1,14 @@
 const filters = document.querySelector('#player-filters');
 const cards = document.querySelector('#player-list');
+const activeFilters = document.querySelector('#active-filters');
+const filterLabels = {
+  search: 'Pseudo', game: 'Jeu', platform: 'Plateforme', level: 'Niveau',
+  play_style: 'Style', slot: 'Créneau', language: 'Langue',
+};
+const criteria = [
+  ['game', 'Jeu en commun', 20], ['platform', 'Même plateforme', 40],
+  ['level', 'Niveau proche', 10], ['availability', 'Créneaux en commun', 30],
+];
 const status = document.querySelector('#player-status');
 const more = document.querySelector('#load-more');
 const panel = document.querySelector('#profile-panel');
@@ -55,6 +64,10 @@ function selectPlayer(player, button) {
   document.querySelector('#selected-name').textContent = player.name;
   document.querySelector('#score-value').textContent = player.score + ' %';
   document.querySelector('#selected-score').value = player.score;
+  const scoreBreakdown = document.querySelector('#score-breakdown');
+  scoreBreakdown.replaceChildren(...criteria.flatMap(([key, label, maximum]) => [
+    el('dt', label), el('dd', (player.score_breakdown?.[key] ?? 0) + ' / ' + maximum),
+  ]));
   const info = [['Plateforme', player.platform], ['Niveau', player.level], ['Style', player.play_style], ['Langue', player.language]];
   document.querySelector('#selected-info').replaceChildren(...info.flatMap(([key, value]) => [
     el('dt', key), el('dd', value || 'À préciser'),
@@ -79,14 +92,18 @@ function render() {
     const row = el('article', undefined, 'player');
     const main = el('div', undefined, 'player-data');
     const meta = [player.games[0], player.platform, player.level, player.play_style].filter(Boolean).join(' · ');
-    main.append(el('h3', player.name), el('p', meta), el('p', player.availability_slots.join(' · ') || player.availability || 'Disponibilités à préciser'));
+    const title = el('h3', player.name);
+    const timing = el('p', player.availability_slots.join(' · ') || player.availability || 'Disponibilités à préciser', 'player-time');
+    main.append(title, el('p', meta), timing);
     const button = el('button', 'Voir le profil', 'button');
     button.type = 'button';
     button.dataset.player = player.id;
     button.setAttribute('aria-label', 'Consulter le profil de ' + player.name);
     button.setAttribute('aria-pressed', String(selected?.id === player.id));
     button.addEventListener('click', () => selectPlayer(player, button));
-    row.append(el('span', initials(player.name), 'avatar'), main, el('span', player.score + ' %', 'chip'), button);
+    const score = el('span', player.score + ' %', 'chip');
+    score.setAttribute('aria-label', player.score + ' % de compatibilité');
+    row.append(el('span', initials(player.name), 'avatar'), main, score, button);
     cards.append(row);
   }
 }
@@ -98,6 +115,10 @@ async function search(page = 1) {
   status.textContent = 'Recherche en cours…';
   more.disabled = true;
   const params = new URLSearchParams(new FormData(filters));
+  if (page === 1) {
+    reflectFilters(params);
+    renderActiveFilters(params);
+  }
   params.set('page', page);
   try {
     const response = await fetch(filters.dataset.endpoint + '?' + params, { signal: controller.signal, headers: { Accept: 'application/json' } });
@@ -114,7 +135,8 @@ async function search(page = 1) {
       panel.classList.remove('open');
     }
     render();
-    if (current && !panel.classList.contains('open')) selectPlayer(current);
+    const recommended = !compact.matches && !current ? players[0] : undefined;
+    if (recommended || (current && !panel.classList.contains('open'))) selectPlayer(recommended || current);
     status.textContent = data.total ? data.total + (data.total === 1 ? ' joueur trouvé' : ' joueurs trouvés') : 'Aucun joueur pour ces critères.';
     more.hidden = !nextPage;
   } catch (error) {
@@ -127,6 +149,54 @@ async function search(page = 1) {
 function updateGames() {
   const game = filters.elements.namedItem('game').value;
   for (const button of document.querySelectorAll('[data-game]')) button.setAttribute('aria-pressed', String(button.dataset.game === game));
+}
+
+function reflectFilters(params) {
+  const url = new URL(location.href);
+  for (const key of [...Object.keys(filterLabels), 'sort']) {
+    const value = params.get(key)?.trim();
+    if (value && (key !== 'sort' || value !== 'score')) url.searchParams.set(key, value);
+    else url.searchParams.delete(key);
+  }
+  history.replaceState(history.state, '', url);
+}
+
+function restoreFilters() {
+  const values = new URLSearchParams(location.search);
+  for (const key of [...Object.keys(filterLabels), 'sort']) {
+    const input = filters.elements.namedItem(key);
+    const value = values.get(key);
+    if (value === null) continue;
+    if (input.tagName === 'SELECT') {
+      if ([...input.options].some(option => option.value === value)) input.value = value;
+    } else {
+      input.value = value.slice(0, input.maxLength);
+    }
+  }
+  updateGames();
+}
+
+function renderActiveFilters(params) {
+  const values = [...params].filter(([key, value]) => Object.hasOwn(filterLabels, key) && value.trim());
+  activeFilters.hidden = values.length === 0;
+  activeFilters.replaceChildren();
+  for (const [key, value] of values) {
+    const remove = el('button', (key === 'search' ? 'Pseudo · ' : '') + value + ' ×', 'filter-chip');
+    remove.type = 'button';
+    remove.setAttribute('aria-label', 'Retirer le filtre ' + filterLabels[key] + ' ' + value);
+    remove.addEventListener('click', () => {
+      filters.elements.namedItem(key).value = '';
+      updateGames();
+      search();
+      filters.elements.namedItem('search').focus();
+    });
+    activeFilters.append(remove);
+  }
+  if (values.length) {
+    const reset = el('button', 'Tout effacer', 'filter-reset');
+    reset.type = 'reset';
+    activeFilters.append(reset);
+  }
 }
 
 async function submitAction(url, payload) {
@@ -159,7 +229,14 @@ for (const image of document.querySelectorAll('.game-cover img')) {
 filters.addEventListener('submit', event => { event.preventDefault(); clearTimeout(timer); search(); });
 filters.elements.namedItem('search').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, 250); });
 filters.addEventListener('change', event => { if (event.target.tagName === 'SELECT') { updateGames(); search(); } });
-filters.addEventListener('reset', () => { clearTimeout(timer); setTimeout(() => { updateGames(); search(); }, 0); });
+filters.addEventListener('reset', () => {
+  clearTimeout(timer);
+  setTimeout(() => {
+    updateGames();
+    search();
+    filters.elements.namedItem('search').focus();
+  }, 0);
+});
 more.addEventListener('click', () => { if (nextPage) search(nextPage); });
 document.querySelector('#show-filters').addEventListener('click', event => {
   const advanced = document.querySelector('#advanced');
@@ -219,4 +296,5 @@ function currentNav() {
 }
 window.addEventListener('hashchange', currentNav);
 currentNav();
+restoreFilters();
 search();

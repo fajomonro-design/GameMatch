@@ -50,6 +50,7 @@ class DashboardController extends Controller
             'play_style' => ['nullable', Rule::in(Matchmaking::STYLES)],
             'language' => ['nullable', Rule::in(Matchmaking::LANGUAGES)],
             'slot' => ['nullable', Rule::in(Matchmaking::SLOTS)],
+            'sort' => ['nullable', Rule::in(['score', 'name'])],
             'page' => ['nullable', 'integer', 'min:1', 'max:10000'],
         ]);
         $query = User::query()->whereKeyNot($viewer->id)->whereJsonLength('games', '>', 0);
@@ -60,11 +61,21 @@ class DashboardController extends Controller
             if (!empty($filters[$field])) $query->where($field, $filters[$field]);
         }
 
+        $sort = ($filters['sort'] ?? 'score') === 'name'
+            ? [['name', 'asc'], ['id', 'asc']]
+            : [['score', 'desc'], ['name', 'asc'], ['id', 'asc']];
         $rows = $query->get(['id', 'name', 'games', 'platform', 'level', 'play_style', 'language', 'bio', 'availability', 'availability_slots'])
-            ->map(fn (User $player) => [...$player->getAttributes(),
-                'games' => $player->games, 'availability_slots' => $player->availability_slots ?? [],
-                'score' => Matchmaking::score($viewer, $player),
-            ])->sortBy([['score', 'desc'], ['name', 'asc'], ['id', 'asc']])->values();
+            ->map(function (User $player) use ($viewer) {
+                $breakdown = Matchmaking::breakdown($viewer, $player);
+
+                return [
+                    ...$player->getAttributes(),
+                    'games' => $player->games,
+                    'availability_slots' => $player->availability_slots ?? [],
+                    'score' => array_sum($breakdown),
+                    'score_breakdown' => $breakdown,
+                ];
+            })->sortBy($sort)->values();
 
         $page = (int) ($filters['page'] ?? 1);
         $visible = $rows->forPage($page, 12)->values();

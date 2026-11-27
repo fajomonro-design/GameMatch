@@ -20,7 +20,7 @@ class DashboardTest extends TestCase
         ];
         $viewer = User::factory()->create($values);
         $match = User::factory()->create([...$values, 'level' => 'Avancé', 'name' => 'Nova', 'bio' => 'Joue en soirée']);
-        User::factory()->create([...$values, 'platform' => 'Xbox', 'name' => 'Orion']);
+        $other = User::factory()->create([...$values, 'platform' => 'Xbox', 'name' => 'Astra']);
         User::factory()->create();
 
         $this->actingAs($viewer)->get(route('dashboard'))->assertOk()->assertSee('Trouve tes coéquipiers');
@@ -28,10 +28,12 @@ class DashboardTest extends TestCase
             ->assertJsonPath('total', 2)
             ->assertJsonPath('players.0.id', $match->id)
             ->assertJsonPath('players.0.score', 100)
+            ->assertJsonPath('players.0.score_breakdown', ['game' => 20, 'platform' => 40, 'level' => 10, 'availability' => 30])
             ->assertJsonPath('players.1.score', 60)
             ->assertJsonMissingPath('players.0.email');
         $this->getJson(route('players.index', ['game' => 'Valorant', 'platform' => 'PC', 'slot' => 'Soir', 'language' => 'Français', 'search' => 'Nov']))
             ->assertJsonPath('total', 1)->assertJsonPath('players.0.bio', 'Joue en soirée');
+        $this->getJson(route('players.index', ['sort' => 'name']))->assertJsonPath('players.0.id', $other->id);
         $this->getJson(route('players.index', ['slot' => 'Matin']))->assertJsonPath('total', 0);
         $this->getJson(route('players.index', ['game' => 'inconnu']))->assertUnprocessable();
     }

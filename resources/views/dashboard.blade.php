@@ -42,10 +42,11 @@
     @if(session('status')) <p role="status" class="notice">{{ session('status') }}</p> @endif
     <section class="hero">
         <div>
-            <p class="eyebrow">TON ESPACE JOUEUR</p>
+
             <h1>Prêt à jouer, <span>{{ $player->name }}</span> ?</h1>
             <p>Trouve des joueurs qui partagent ton niveau, ton style et ta passion.</p>
-            <a class="button primary" href="#recherche">Trouver mon équipe</a>
+            <div class="hero-actions"><a class="button primary" href="#recherche">Trouver mon équipe</a>
+            <a class="button hero-secondary" href="{{ route('profile') }}">Mon profil</a></div>
         </div>
     </section>
     <section class="library" aria-labelledby="library-title">
@@ -53,14 +54,14 @@
         <div class="game-strip">
             @foreach ($games as $game => $cover)
                 <button class="game-cover" type="button" data-game="{{ $game }}" aria-pressed="false">
-                    <img src="{{ $cover }}" alt="" loading="lazy" referrerpolicy="no-referrer">
+                    <img src="{{ asset($cover) }}" alt="" loading="lazy" referrerpolicy="no-referrer">
                     <span>{{ $game }}</span>
                 </button>
             @endforeach
         </div>
     </section>
     <section class="search" id="recherche" aria-labelledby="search-title">
-        <div class="heading"><h2 id="search-title">Trouve tes coéquipiers</h2><a href="{{ route('profile') }}">Mettre à jour mon profil</a></div>
+        <div class="heading"><h2 id="search-title">Trouve tes coéquipiers</h2></div>
         @if (empty($player->games) || empty($player->availability_slots)) <p class="hint">Ajoute tes jeux et tes créneaux dans ton profil pour obtenir des scores plus précis.</p> @endif
         <form id="player-filters" data-endpoint="{{ route('players.index') }}">
             <div class="search-line"><label class="search-field">Pseudo<input name="search" type="search" maxlength="80" placeholder="Rechercher un joueur"></label><button type="submit" class="button">Rechercher</button><button id="show-filters" type="button" class="button" aria-expanded="false" aria-controls="advanced">Filtres</button></div>
@@ -69,10 +70,13 @@
                 @foreach ($filters as $field => [$label, $values])
                     <label>{{ $label }}<select name="{{ $field }}"><option value="">Tous</option>@foreach ($values as $value)<option>{{ $value }}</option>@endforeach</select></label>
                 @endforeach
-                <button class="link-button" type="reset">Réinitialiser les filtres</button>
+            </div>
+            <div id="active-filters" class="active-filters" aria-label="Filtres appliqués" hidden></div>
+            <div class="results-bar">
+                <p id="player-status" role="status" class="hint">Chargement des joueurs…</p>
+                <label class="sort-field">Trier par<select name="sort"><option value="score">Compatibilité</option><option value="name">Pseudo</option></select></label>
             </div>
         </form>
-        <p id="player-status" role="status" class="hint">Chargement des joueurs…</p>
         <div id="player-list" class="player-list"></div>
         <button id="load-more" class="button" type="button" hidden>Afficher plus de joueurs</button>
         <noscript><p>Active JavaScript pour rechercher et comparer les profils.</p></noscript>
@@ -101,10 +105,11 @@
 <aside id="profile-panel" class="profile-panel" aria-labelledby="panel-title" tabindex="-1">
     <button id="close-profile" class="button" type="button" aria-label="Fermer le profil">Fermer</button>
     <h2 id="panel-title">Profil joueur</h2>
-    <p id="no-selection" class="hint">Sélectionne un joueur pour consulter son profil.</p>
+    <div id="no-selection" class="profile-placeholder"><span class="avatar" aria-hidden="true">GM</span><p>Sélectionne un joueur pour consulter son profil.</p></div>
     <div id="selected-profile" hidden>
         <div class="selected-head"><span id="selected-avatar" class="avatar"></span><h3 id="selected-name"></h3></div>
-        <div class="score"><label for="selected-score">Compatibilité <strong id="score-value"></strong></label><progress id="selected-score" max="100" value="0"></progress></div>
+        <div class="score"><label for="selected-score">Compatibilité <strong id="score-value"></strong></label><progress id="selected-score" max="100" value="0"></progress>
+        <details><summary>Détail du score</summary><dl id="score-breakdown"></dl></details></div>
         <div class="tabs" role="group" aria-label="Informations du profil">
             <button type="button" data-tab="about" aria-pressed="true">À propos</button>
             <button type="button" data-tab="games" aria-pressed="false">Jeux</button>
