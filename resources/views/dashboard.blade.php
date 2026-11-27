@@ -51,11 +51,9 @@
     <section class="library" aria-labelledby="library-title">
         <div class="heading"><h2 id="library-title">Bibliothèque de jeux</h2><button class="link-button" type="button" data-game="" aria-pressed="true">Tous les jeux</button></div>
         <div class="game-strip">
-            @foreach ($games as $game => $steamId)
+            @foreach ($games as $game => $cover)
                 <button class="game-cover" type="button" data-game="{{ $game }}" aria-pressed="false">
-                    @if ($steamId)
-                        <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ $steamId }}/library_600x900.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-                    @endif
+                    <img src="{{ $cover }}" alt="" loading="lazy" referrerpolicy="no-referrer">
                     <span>{{ $game }}</span>
                 </button>
             @endforeach

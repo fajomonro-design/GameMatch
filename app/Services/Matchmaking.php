@@ -7,9 +7,15 @@ use App\Models\User;
 final class Matchmaking
 {
     public const GAMES = [
-        'Valorant' => null, 'Fortnite' => null, 'Minecraft' => null, 'Marvel Rivals' => 2767030,
-        'League of Legends' => null, 'Rocket League' => 252950, 'Apex Legends' => 1172470,
-        'Call of Duty' => 1938090, 'Counter-Strike 2' => 730,
+        'Valorant' => 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/cbf4460132cdfeb2a97fad5f9dd25ba0bc058f76-128x128.png',
+        'Fortnite' => 'https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/cmfo4y74z03yw07ohsjgs0qj7',
+        'Minecraft' => 'https://www.minecraft.net/content/dam/minecraftnet/franchise/logos/minecraft-creeper-face.jpg',
+        'Marvel Rivals' => 'https://cdn.cloudflare.steamstatic.com/steam/apps/2767030/library_600x900.jpg',
+        'League of Legends' => 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/content_organization_live/bdc123b2cae1ff76fea465b287240cab8f3208a7-1200x630.jpg',
+        'Rocket League' => 'https://cdn.cloudflare.steamstatic.com/steam/apps/252950/library_600x900.jpg',
+        'Apex Legends' => 'https://cdn.cloudflare.steamstatic.com/steam/apps/1172470/library_600x900.jpg',
+        'Call of Duty' => 'https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/library_600x900.jpg',
+        'Counter-Strike 2' => 'https://cdn.cloudflare.steamstatic.com/steam/apps/730/library_600x900.jpg',
     ];
 
     public const PLATFORMS = ['PC', 'PlayStation', 'Xbox', 'Nintendo Switch', 'Mobile'];
