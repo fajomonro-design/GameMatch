@@ -21,6 +21,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'age_group',
+        'platform',
+        'games',
+        'level',
+        'play_style',
+        'availability',
     ];
 
     /**
@@ -43,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'games' => 'array',
         ];
     }
 }
